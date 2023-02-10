@@ -88,13 +88,24 @@ class ScooterApp {
     }
   }
 
-  print() {
-    console.log("List of scooters and locations:");
-    for (const key in this.stations) {
-      console.log(`station: ${key}, scooters: ${(Object.values(this.stations[key])).length}`);
-    }
-    console.log("list of registered users" + Object.keys(test.registeredUsers))
+  print(){
+    let keys = Object.keys(this.registeredUsers)
+    let stationKeys = Object.keys(this.stations)
+    console.log("--------------------------------------------------")
+    console.log("Current Registered Users:")
+    console.log(keys)
+    console.log("--------------------------------------------------")
+    console.log("Current Docked Scooters:")
 
+    for (let i=0; i<stationKeys.length; i++){
+      let scooterCount = this.stations[stationKeys[i]].length;
+      if(this.stations[stationKeys[i]][0].station == null)
+      {
+        scooterCount--;
+      }
+      console.log(stationKeys[i] + " : " + scooterCount)
+    }
+    console.log("--------------------------------------------------")
   }
 
 }//last curly bracket for class
