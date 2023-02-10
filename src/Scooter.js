@@ -9,9 +9,10 @@ class Scooter{
   }
   rent () {
     if (this.charge > 20 && this.isBroken === false) {
-      this.station === null;
+      this.user = this.station
+      this.station = null;
     } else {
-      this.user === null;
+      this.user = null;
       if (this.charge < 20) {
         throw new Error ("scooter needs to charge")
       } else if (this.isBroken === true) {
@@ -20,8 +21,8 @@ class Scooter{
     }
   }
   dock(station) {
-    this.station === station
-    this.user === null;
+    this.station = station
+    this.user = null;
   }
 
   recharge() {
@@ -30,6 +31,7 @@ class Scooter{
     this.charge++;
     if (this.charge % 20 === 0) {
       console.log('Charge is now at ' + this.charge);
+      
     }
     if (this.charge === 100) {
       clearInterval(interval);
@@ -38,14 +40,14 @@ class Scooter{
   }.bind(this), 1000);
 }
 
-  requestRepair () {
-    console.log(this.isBroken)
-    let interval = setInterval(function() {
-      this.broken = false;
-      console.log("repair completed")
-      clearInterval(interval);
-    }.bind(this), 5000);
-  }
+requestRepair () {
+  console.log(this.isBroken)
+  let interval = setInterval(function() {
+    this.isBroken = false;
+    console.log("repair completed")
+    clearInterval(interval);
+  }.bind(this), 5000);
+}
   
 
 }

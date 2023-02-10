@@ -1,84 +1,54 @@
-class Scooter {
-  constructor(charge, isBroken) {
-    this.charge = charge;
-    this.isBroken = isBroken;
-    this.user = null;
-    this.station = null;
-  }
+const Scooter = require('../src/Scooter')
+const User = require('../src/User')
 
-  rent() {
-    if (this.charge > 20 && !this.isBroken) {
-      this.user = "User";
-      this.station = null;
-      console.log("Scooter checked out to user.");
-    } else if (this.charge <= 20) {
-      throw new Error("Scooter needs to charge.");
-    } else if (this.isBroken) {
-      throw new Error("Scooter needs repair.");
-    }
-  }
-
-  dock(station) {
-    this.station = station;
-    this.user = null;
-    console.log("Scooter returned to station.");
-  }
-
-  recharge() {
-    let intervalId = setInterval(() => {
-      if (this.charge < 100) {
-        this.charge += 10;
-        console.log(`Scooter charged to ${this.charge}%.`);
-      } else {
-        clearInterval(intervalId);
-        console.log("Scooter fully charged.");
-      }
-    }, 1000);
-  }
-
-  requestRepair() {
-    let intervalId = setInterval(() => {
-      this.isBroken = false;
-      console.log("Repair completed.");
-      clearInterval(intervalId);
-    }, 5000);
-  }
-}
-
-describe('Scooter'), () => {
+describe('Scooter', () => {
   let scooter;
-
   beforeEach(() => {
-    scooter = new Scooter(50, false);
+    scooter = new Scooter('station', 'user', 50, false);
   });
-}
 
-  test('can be rented if charged above 20% and not broken', () => {
+  test('rent method should update station to null and user to station1 if scooter is charged and not broken', () => {
     scooter.rent();
-    expect(scooter.user).toBe("User");
     expect(scooter.station).toBe(null);
+    expect(scooter.user).toBe('station');
   });
 
-  test('cannot be rented if charged below 20%', () => {
+  test('rent method should throw an error if scooter is not charged', () => {
     scooter.charge = 10;
-    expect(() => scooter.rent()).toThrowError("Scooter needs to charge.");
+    expect(() => {
+      scooter.rent();
+    }).toThrowError('scooter needs to charge');
   });
 
-  test('cannot be rented if broken', () => {
+  test('rent method should throw an error if scooter is broken', () => {
     scooter.isBroken = true;
-    expect(() => scooter.rent()).toThrowError("Scooter needs repair.");
+    expect(() => {
+      scooter.rent();
+    }).toThrowError('scooter needs to be repaired');
   });
 
-  test('can be returned to a station', () => {
-    scooter.rent();
-    scooter.dock("Station 1");
+  test('dock method should update station to station2 and user to null', () => {
+    scooter.dock('station');
+    expect(scooter.station).toBe('station');
     expect(scooter.user).toBe(null);
-    expect(scooter.station).toBe("Station 1");
   });
 
-  test('can be recharged'), () => {
-    jest.spyOn(console, 'log');
+  test('recharge method should increase charge of scooter by 1 every second', () => {
+    jest.useFakeTimers();
     scooter.recharge();
-    expect(console.log.mock.calls[0][0]).toBe("Scooter charged to 60%.");
-    expect(console.log.mock.calls[1][0]).toBe("Scooter charged to 70%.");
-  }
+    expect(scooter.charge).toBe(50);
+    jest.advanceTimersByTime(1000);
+    expect(scooter.charge).toBe(51);
+    jest.runAllTimers();
+    expect(scooter.charge).toBe(100);
+  });
+
+  test('requestRepair method should change isBroken to false', () => {
+    const scooter = new Scooter("A Station", "A User", 50, true);
+    scooter.requestRepair();
+  
+    setTimeout(() => {
+      expect(scooter.isBroken).toBe(false);
+    }, 5100);
+  });
+});
