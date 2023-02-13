@@ -3,40 +3,41 @@ const Scooter = require('./Scooter')
 
 class ScooterApp {
   //constructor(stations, retisteredUsers) <--- correct params 
-  constructor(registeredUsers) {
+  constructor() {
     this.stations = {
       wolverhampton: [],
       leicester: [],
       manchester: []
     }
-    this.registeredUsers = registeredUsers
+    this.registeredUsers = {
+
+    }
   }
 
   registerUser(username, password, age) {
-    for (let i = 0; i < Object.keys(this.registeredUsers).length; i++) {
-      if (Object.keys(this.registeredUsers)[i] == username) {
-        return console.log("already registered");
-      }
+    if (this.registeredUsers[username]) {
+      throw new Error('User already registered');
+    } else if (age < 18) {
+      throw new Error('Too young to register');
+    } else {
+      const user = new User(username, password, age);
+      this.registeredUsers[username] = user;
+      console.log(`User ${username} has been registered`);
+      return user;
     }
-    if (age < 18) {
-      return console.log("too young to register");
-    }
-    this.registeredUsers[username] = password;
-    console.log("user has been added")
   }
-  loginUser(username, password) {
-    let bool = false;
-    for (let i = 0; i < Object.keys(this.registeredUsers).length; i++) {
-      if ((username in this.registeredUsers && this.registeredUsers[username].password == password)) {
-      console.log("user has been logged in")
-      bool = true
-      this.registeredUsers[username].loggedIn = true;
-      break;
-    } 
-    }
-    if (!bool) {
-      console.log("incorrect username or password")
-    }
+
+    
+loginUser(username, password) {
+  let user = this.registeredUsers[username];
+  if (!user) {
+    throw new Error("Username or password is incorrect");
+  }
+  if (user.password !== password) {
+    throw new Error("Username or password is incorrect");
+  }
+  user.login();
+  console.log(`${username} has been logged in`);
   }
   
   logOutUser (username) {
@@ -54,61 +55,64 @@ class ScooterApp {
       console.log("no such user was logged in")
     }
   }
-  
-  createScooter(station) {
-    let newScooter = new Scooter (station, null, 1, 1, 100, false)
-    if (station in this.stations) {
-    this.stations[station].push(newScooter);
-    console.log("created new scooter");
-    return newScooter
-    } else {
-      throw new Error ("no such station");
+  createScooter(stationName) {
+    const station = this.stations.find(s => s.name === stationName);
+    if (!station) {
+        throw new Error('No such station');
     }
-  }
-  dockScooter(scooter, station) {
-    if (!this.stations[station]) {
-      throw new Error("no such station");
-    }
-    if (scooter.station === station) {
-      throw new Error("scooter already at station");
-    }
-    this.stations[station].push(scooter);
+
+    const scooter = new Scooter(this.scooters.length + 1);
     scooter.station = station;
-    scooter.dock();
-    console.log(`Scooter is docked at ${station}`);
+    station.scooters.push(scooter);
+    this.scooters.push(scooter);
+    console.log(`Created new scooter ${scooter.id}`);
+
+    return scooter;
+}
+dockScooter(scooter, station) {
+  let stationExists = this.stations.some(st => st.name === station);
+  if (!stationExists) {
+    throw new Error("No such station error");
   }
 
-  rentScooter(scooter, user) {
-    if(scooter.station in this.stations) {
-      scooter.user = user;
-      scooter.station = null;
-      console.log("scooter is rented");
-    } else {
-      console.log("scooter already rented")
-    }
+  let scooterExists = this.stations.find(st => st.name === station).scooters.some(s => s.id === scooter.id);
+  if (scooterExists) {
+    throw new Error("Scooter already at station error");
   }
 
-  print(){
-    let keys = Object.keys(this.registeredUsers)
-    let stationKeys = Object.keys(this.stations)
-    console.log("--------------------------------------------------")
-    console.log("Current Registered Users:")
-    console.log(keys)
-    console.log("--------------------------------------------------")
-    console.log("Current Docked Scooters:")
-
-    for (let i=0; i<stationKeys.length; i++){
-      let scooterCount = this.stations[stationKeys[i]].length;
-      if(this.stations[stationKeys[i]][0].station == null)
-      {
-        scooterCount--;
-      }
-      console.log(stationKeys[i] + " : " + scooterCount)
-    }
-    console.log("--------------------------------------------------")
+  let targetStation = this.stations.find(st => st.name === station);
+  targetStation.scooters.push(scooter);
+  scooter.station = targetStation;
+  console.log(`Scooter is docked at ${targetStation.name} station`);
+}
+rentScooter(scooter, user) {
+  const station = this.stations.find(s => s.scooters.includes(scooter));
+  if (!station) {
+      throw new Error("No such scooter found");
+  }
+  if (scooter.user) {
+      throw new Error("Scooter already rented");
+  }
+  station.scooters = station.scooters.filter(s => s !== scooter);
+  scooter.user = user;
+  scooter.station = null;
+  this.users.push(user);
+  console.log(`Scooter is rented: ${scooter.id}`);
+}
+print() {
+  console.log("Registered Users:");
+  for (let i = 0; i < users.length; i++) {
+    console.log(`${i + 1}. ${users[i].name}`);
   }
 
-}//last curly bracket for class
+  console.log("\nStations:");
+  for (let i = 0; i < stations.length; i++) {
+    console.log(`${i + 1}. ${stations[i].name} (${stations[i].scooters.length} scooters)`);
+  }
+}
+  
+
+};//last curly bracket for class
 
 
 

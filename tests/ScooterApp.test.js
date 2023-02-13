@@ -2,267 +2,231 @@ const Scooter = require('../src/Scooter')
 const User = require('../src/User')
 const ScooterApp = require('../src/ScooterApp')
 
-const ScooterApp = require('./ScooterApp');
-
 describe('ScooterApp', () => {
-  describe('stations property', () => {
-    let app;
+  let app;
 
-    beforeEach(() => {
-      app = new ScooterApp();
-    });
-
-    it('should be an object', () => {
-      expect(typeof app.stations).toBe('object');
-    });
-
-    it('should have at least 3 keys', () => {
-      expect(Object.keys(app.stations).length).toBeGreaterThanOrEqual(3);
-    });
-
-    it('should have values that are arrays', () => {
-      Object.values(app.stations).forEach(value => {
-        expect(Array.isArray(value)).toBe(true);
-      });
-    });
-
-    it('should have empty arrays as values initially', () => {
-      Object.values(app.stations).forEach(value => {
-        expect(value.length).toBe(0);
-      });
-    });
-    describe('ScooterApp registeredUsers property', () => {
-        let scooterApp;
-      
-        beforeEach(() => {
-          scooterApp = new ScooterApp();
-        });
-      
-        test('registeredUsers is an object', () => {
-          expect(typeof scooterApp.registeredUsers).toBe('object');
-        });
-      
-        test('registeredUsers keys are usernames', () => {
-          const username = 'user1';
-          const user = new User(username, 'password', 18);
-          scooterApp.registerUser(user);
-      
-          expect(scooterApp.registeredUsers[username]).toBeDefined();
-          expect(scooterApp.registeredUsers[username]).toEqual(user);
-        });
-      
-        test('registering a new user adds it to registeredUsers', () => {
-          const username = 'user2';
-          const user = new User(username, 'password', 20);
-          scooterApp.registerUser(user);
-      
-          expect(scooterApp.registeredUsers[username]).toBeDefined();
-          expect(scooterApp.registeredUsers[username]).toEqual(user);
-        });
-      
-        test('registeredUsers is initially empty', () => {
-          expect(Object.keys(scooterApp.registeredUsers).length).toBe(0);
-        });
-      });
-      describe('registerUser', () => {
-        let scooterApp;
-        
-        beforeEach(() => {
-          scooterApp = new ScooterApp();
-        });
-        
-        test('registers a new user if they are 18 or older and not already registered', () => {
-          const user = scooterApp.registerUser('johndoe', 'secret', 18);
-          expect(user).toEqual({
-            username: 'johndoe',
-            password: 'secret',
-            age: 18,
-            scooter: null,
-            isLoggedIn: false
-          });
-          expect(scooterApp.registeredUsers).toHaveProperty('johndoe');
-          expect(scooterApp.registeredUsers['johndoe']).toEqual({
-            username: 'johndoe',
-            password: 'secret',
-            age: 18,
-            scooter: null,
-            isLoggedIn: false
-          });
-        });
-        
-        test('throws error if user is already registered', () => {
-          scooterApp.registeredUsers['johndoe'] = {
-            username: 'johndoe',
-            password: 'secret',
-            age: 18,
-            scooter: null,
-            isLoggedIn: false
-          };
-          expect(() => {
-            scooterApp.registerUser('johndoe', 'secret', 18);
-          }).toThrowError('User already registered');
-        });
-        
-        test('throws error if user is under 18 years old', () => {
-          expect(() => {
-            scooterApp.registerUser('johndoe', 'secret', 17);
-          }).toThrowError('User too young to register');
-        });
-      });
-      describe("loginUser", () => {
-        let app;
-      
-        beforeEach(() => {
-          app = new ScooterApp();
-          app.registerUser("user1", "password", 18);
-        });
-      
-        it("logs in a registered user with correct password", () => {
-          const user = app.loginUser("user1", "password");
-          expect(user.loggedIn).toBe(true);
-          expect(console.log).toHaveBeenCalledWith("user1 has been logged in");
-        });
-      
-        it("throws an error if the user is not registered", () => {
-          expect(() => app.loginUser("user2", "password")).toThrowError(
-            "Username or password is incorrect"
-          );
-        });
-      
-        it("throws an error if the password is incorrect", () => {
-          expect(() => app.loginUser("user1", "incorrect")).toThrowError(
-            "Username or password is incorrect"
-          );
-        });
-      });
-      describe('logoutUser', () => {
-        it('should logout a registered user', () => {
-          const scooterApp = new ScooterApp();
-      
-          const registeredUser = scooterApp.registerUser('JohnDoe', 'password123', 21);
-          scooterApp.loginUser('JohnDoe', 'password123');
-      
-          const logoutResult = scooterApp.logoutUser('JohnDoe');
-      
-          expect(logoutResult).toBe('User JohnDoe is logged out');
-        });
-      
-        it('should throw an error if the user is not registered', () => {
-          const scooterApp = new ScooterApp();
-      
-          expect(() => {
-            scooterApp.logoutUser('JaneDoe');
-          }).toThrowError('No such user is logged in');
-        });
-      });
-      describe('createScooter', () => {
-        it('creates a new scooter and adds it to the specified station', () => {
-          const scooterApp = new ScooterApp();
-          const station = 'Central Park';
-      
-          scooterApp.createScooter(station);
-          const scootersAtStation = scooterApp.stations[station];
-      
-          expect(scootersAtStation).toHaveLength(1);
-          expect(scootersAtStation[0]).toBeInstanceOf(Scooter);
-          expect(scootersAtStation[0].station).toBe(station);
-        });
-      
-        it('throws an error if the specified station does not exist', () => {
-          const scooterApp = new ScooterApp();
-          const station = 'Non-existent Station';
-      
-          expect(() => scooterApp.createScooter(station)).toThrowError('No such station');
-        });
-      });
-      describe("dockScooter", () => {
-        test("docks a scooter to a station", () => {
-          const scooter = new Scooter();
-          const station = "station1";
-          const app = new ScooterApp();
-      
-          // Add a scooter to the station list
-          app.dockScooter(scooter, station);
-          expect(app.stations[station]).toContain(scooter);
-          expect(scooter.docked).toBe(true);
-        });
-      
-        test("throws error if station does not exist", () => {
-          const scooter = new Scooter();
-          const station = "invalid_station";
-          const app = new ScooterApp();
-      
-          expect(() => app.dockScooter(scooter, station)).toThrowError(
-            "no such station error"
-          );
-        });
-      
-        test("throws error if scooter already at station", () => {
-          const scooter = new Scooter();
-          const station = "station1";
-          const app = new ScooterApp();
-      
-          app.dockScooter(scooter, station);
-          expect(() => app.dockScooter(scooter, station)).toThrowError(
-            "scooter already at station error"
-          );
-        });
-      });
-      
-      describe("rentScooter", () => {
-        test("rents a scooter to a user", () => {
-          const scooter = new Scooter();
-          const user = new User("user1", "password", 18);
-          const station = "station1";
-          const app = new ScooterApp();
-      
-          app.dockScooter(scooter, station);
-          app.rentScooter(scooter, user);
-      
-          expect(app.stations[station]).not.toContain(scooter);
-          expect(scooter.user).toBe(user);
-          expect(scooter.docked).toBe(false);
-        });
-      
-        test("throws error if scooter is already rented", () => {
-          const scooter = new Scooter();
-          const user = new User("user1", "password", 18);
-          const station = "station1";
-          const app = new ScooterApp();
-      
-          app.dockScooter(scooter, station);
-          app.rentScooter(scooter, user);
-          expect(() => app.rentScooter(scooter, user)).toThrowError(
-            "scooter already rented"
-          );
-        });
-      });
-      describe('ScooterApp print method', () => {
-        let app;
-        beforeEach(() => {
-          app = new ScooterApp();
-        });
-      
-        test('Logs registered users and stations with scooters count', () => {
-          // Register a user
-          app.registerUser('john', 'password', 25);
-      
-          // Create a scooter and dock it at a station
-          const scooter = app.createScooter('station1');
-          app.dockScooter(scooter, 'station1');
-      
-          // Spy on the console.log method to capture its output
-          jest.spyOn(console, 'log').mockImplementation(() => {});
-      
-          // Call the print method
-          app.print();
-      
-          // Check that the correct output was logged to the console
-          expect(console.log).toHaveBeenCalledWith('Registered Users:');
-          expect(console.log).toHaveBeenCalledWith({ 'john': { username: 'john', age: 25, isLoggedIn: false } });
-          expect(console.log).toHaveBeenCalledWith('Stations:');
-          expect(console.log).toHaveBeenCalledWith({ 'station1': [{ id: expect.any(Number), station: 'station1', isRented: false }] });
-        });
-      });
+  beforeEach(() => {
+    app = new ScooterApp();
   });
+
+  describe('registerUser', () => {
+    let scooterApp;
+  
+    beforeEach(() => {
+      scooterApp = new ScooterApp();
+    });
+  
+    it('should register a new user', () => {
+      const username = 'john_doe';
+      const password = 'password';
+      const age = 20;
+  
+      const registeredUser = scooterApp.registerUser(username, password, age);
+      expect(registeredUser).toBeInstanceOf(User);
+      expect(registeredUser.username).toBe(username);
+      expect(registeredUser.password).toBe(password);
+      expect(registeredUser.age).toBe(age);
+    });
+  
+    it('should throw an error if the user is already registered', () => {
+      const username = 'john_doe';
+      const password = 'password';
+      const age = 20;
+  
+      scooterApp.registerUser(username, password, age);
+      expect(() => {
+        scooterApp.registerUser(username, password, age);
+      }).toThrowError('User already registered');
+    });
+  
+    it('should throw an error if the user is too young to register', () => {
+      const username = 'john_doe';
+      const password = 'password';
+      const age = 17;
+  
+      expect(() => {
+        scooterApp.registerUser(username, password, age);
+      }).toThrowError('Too young to register');
+    });
+
+    it('throws an error if the user is already registered', () => {
+      app.registerUser('user1', 'password', 20);
+      expect(() => {
+        app.registerUser('user1', 'password', 20);
+      }).toThrowError('already registered or too young to register');
+    });
+
+    it('throws an error if the user is too young', () => {
+      expect(() => {
+        app.registerUser('user1', 'password', 17);
+      }).toThrowError('already registered or too young to register');
+    });
+  });
+  describe("loginUser", () => {
+    let scooterApp;
+  
+    beforeEach(() => {
+      scooterApp = new ScooterApp();
+      scooterApp.registerUser("user1", "password1", 20);
+    });
+  
+    test("logs in a registered user successfully", () => {
+      const spy = jest.spyOn(console, "log");
+      scooterApp.loginUser("user1", "password1");
+      expect(spy).toHaveBeenCalledWith("User user1 has been logged in.");
+    });
+  
+    test("throws an error if the user cannot be located", () => {
+      expect(() => {
+        scooterApp.loginUser("user2", "password2");
+      }).toThrowError("Username or password is incorrect.");
+    });
+  
+    test("throws an error if the password is incorrect", () => {
+      expect(() => {
+        scooterApp.loginUser("user1", "password2");
+      }).toThrowError("Username or password is incorrect.");
+    });
+  });
+  const scooterApp = new ScooterApp();
+const user = scooterApp.registerUser('user1', 'password1', 18);
+
+test('user can log out', () => {
+  scooterApp.loginUser('user1', 'password1');
+  scooterApp.logoutUser('user1');
+  expect(user.isLoggedIn).toBe(false);
+});
+
+test('user cannot log out if not logged in', () => {
+  expect(() => {
+    scooterApp.logoutUser('user1');
+  }).toThrowError('No such user is logged in');
+});
+
+test('user cannot log out if not registered', () => {
+  expect(() => {
+    scooterApp.logoutUser('user2');
+  }).toThrowError('No such user is logged in');
+});
+
+test('creates a new scooter and adds it to the station', () => {
+    scooterApp.stations.push(new Station('station 1'));
+    const scooter = scooterApp.createScooter('station 1');
+    expect(scooter).toBeDefined();
+    expect(scooter.id).toBe(1);
+    expect(scooter.station.name).toBe('station 1');
+    expect(scooterApp.scooters.length).toBe(1);
+    expect(scooterApp.stations[0].scooters.length).toBe(1);
+});
+
+test('throws an error if the station does not exist', () => {
+    expect(() => scooterApp.createScooter('station 2')).toThrow('No such station');
+});
+
+test("Dock scooter to station successfully", () => {
+  let station = { name: "Station 1", scooters: [] };
+  scooterApp.stations.push(station);
+
+  let scooter = { id: "SC001", station: null };
+  scooterApp.dockScooter(scooter, "Station 1");
+
+  expect(scooter.station).toEqual(station);
+  expect(station.scooters).toContain(scooter);
+});
+
+test("Throw error when station does not exist", () => {
+  let scooter = { id: "SC002", station: null };
+
+  expect(() => {
+    scooterApp.dockScooter(scooter, "Station 2");
+  }).toThrow("No such station error");
+});
+
+test("Throw error when scooter is already at station", () => {
+  let station = { name: "Station 1", scooters: [] };
+  scooterApp.stations.push(station);
+
+  let scooter = { id: "SC003", station: null };
+  scooterApp.stations[0].scooters.push(scooter);
+  scooter.station = scooterApp.stations[0];
+
+  expect(() => {
+    scooterApp.dockScooter(scooter, "Station 1");
+  }).toThrow("Scooter already at station error");
+});
+describe('rentScooter', () => {
+  let app;
+  let user;
+  let scooter;
+
+  beforeEach(() => {
+    app = new ScooterApp();
+    user = app.registerUser('john', 'pass123', 20);
+    scooter = new Scooter(1);
+    app.stations = {
+      wolverhampton: [scooter],
+      leicester: [],
+      manchester: []
+    };
+  });
+
+  it('should rent the scooter to the user', () => {
+    app.rentScooter(scooter, user);
+    expect(scooter.user).toBe(user);
+    expect(app.stations.wolverhampton.length).toBe(0);
+    expect(app.users.length).toBe(1);
+    expect(app.users[0]).toBe(user);
+  });
+
+  it('should throw an error if the scooter is already rented', () => {
+    scooter.user = user;
+    expect(() => app.rentScooter(scooter, user)).toThrow('Scooter already rented');
+  });
+
+  it('should throw an error if the scooter is not found', () => {
+    const fakeScooter = new Scooter(2);
+    expect(() => app.rentScooter(fakeScooter, user)).toThrow('No such scooter found');
+  });
+});
+describe("ScooterApp.print", () => {
+  let scooterApp;
+
+  beforeEach(() => {
+    scooterApp = new ScooterApp();
+  });
+
+  test("Prints a list of registered users", () => {
+    scooterApp.registeredUsers = {
+      "user1": new User("user1", "pass1", 18),
+      "user2": new User("user2", "pass2", 18)
+    };
+
+    scooterApp.stations = [      new Station("wolverhampton", []),
+      new Station("leicester", [])
+    ];
+
+    const logSpy = jest.spyOn(console, "log");
+
+    scooterApp.print();
+
+    expect(logSpy).toHaveBeenCalledWith("Registered Users:");
+    expect(logSpy).toHaveBeenCalledWith("1. user1");
+    expect(logSpy).toHaveBeenCalledWith("2. user2");
+  });
+
+  test("Prints a list of stations with scooters count", () => {
+    scooterApp.registeredUsers = {};
+    scooterApp.stations = [      new Station("wolverhampton", [new Scooter(1), new Scooter(2)]),
+      new Station("leicester", [new Scooter(3), new Scooter(4)])
+    ];
+
+    const logSpy = jest.spyOn(console, "log");
+
+    scooterApp.print();
+
+    expect(logSpy).toHaveBeenCalledWith("\nStations:");
+    expect(logSpy).toHaveBeenCalledWith("1. wolverhampton (2 scooters)");
+    expect(logSpy).toHaveBeenCalledWith("2. leicester (2 scooters)");
+  });
+});
 });
